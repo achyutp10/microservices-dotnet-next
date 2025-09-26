@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
+WORKDIR /app
+
+COPY Carsties.sln Carsties.sln
+COPY src/ItentityService/ItentityService.csproj src/ItentityService/
+
+RUN dotnet restore ./src/ItentityService/ItentityService.csproj
+
+COPY . .
+
+RUN dotnet publish ./src/ItentityService/ItentityService.csproj -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+EXPOSE 80
+COPY --from=build /app/publish .
+ENTRYPOINT [ "dotnet", "ItentityService.dll" ]
